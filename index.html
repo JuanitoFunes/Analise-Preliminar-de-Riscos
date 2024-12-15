@@ -1,0 +1,829 @@
+<html><head><base href="." /><meta charset="UTF-8"><style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+    font-weight: bold;
+}
+
+.danger-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 25px;
+    display: block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.form-group {
+    margin-bottom: 25px;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+input[type="text"],
+input[type="date"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+.checkbox-group {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr; /* Changed from 2 to 3 columns */
+    gap: 10px;
+}
+
+.checkbox-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.checkbox-item {
+    padding: 8px;
+    transition: background 0.3s ease;
+}
+
+.checkbox-item:hover {
+    background: #e9ecef;
+    border-radius: 4px;
+}
+
+button {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    padding: 14px 30px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    width: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.step-item {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    transition: transform 0.2s ease;
+}
+
+.step-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.step-number {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.signature-container {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+#signatureCanvas {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: crosshair;
+}
+
+.print-button {
+    background: linear-gradient(135deg, #34495e, #2c3e50) !important;
+    margin-top: 20px !important;
+}
+
+/* Add subtle animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-group {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Improve responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .checkbox-group {
+        grid-template-columns: 1fr; /* Stack to single column on mobile */
+    }
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head><body>
+
+<div class="container">
+    <svg class="danger-icon" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2">
+        <path d="M12 2L2 22h20L12 2z"/>
+        <path d="M12 16v-6"/>
+        <circle cx="12" cy="18" r="1"/>
+    </svg>
+    
+    <h1>Análise Preliminar de Risco (APR)</h1>
+    
+    <form id="riskForm">
+        <div class="form-group">
+            <label>Atividade a ser Realizada:</label>
+            <input type="text" required>
+        </div>
+
+        <div class="form-group">
+            <label>Local da Atividade:</label>
+            <input type="text" placeholder="Informe o local onde será realizada a atividade" required>
+        </div>
+
+        <div class="form-group">
+            <label>Data da Análise:</label>
+            <input type="date" required>
+        </div>
+
+        <div class="form-group">
+            <label>Responsável pela Análise:</label>
+            <input type="text" required>
+        </div>
+
+        <div class="form-group">
+            <label>Atividades Críticas:</label>
+            <div class="checkbox-group">
+                <div class="checkbox-column">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="altura" name="atividades_criticas">
+                        <label for="altura">Trabalho em Altura</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="eletricidade" name="atividades_criticas">
+                        <label for="eletricidade">Trabalho com Eletricidade</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="quente" name="atividades_criticas">
+                        <label for="quente">Trabalho a Quente</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="icamento" name="atividades_criticas">
+                        <label for="icamento">Içamento de Cargas</label>
+                    </div>
+                </div>
+                <div class="checkbox-column">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="confinado" name="atividades_criticas">
+                        <label for="confinado">Espaço Confinado</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="veiculos" name="atividades_criticas">
+                        <label for="veiculos">Veículos automotores leves</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="equipamentos" name="atividades_criticas">
+                        <label for="equipamentos">Operação de equipamentos móveis</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="bloqueio" name="atividades_criticas">
+                        <label for="bloqueio">Bloqueio, identificação e zero energia</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Descrição da Atividade:</label>
+            <textarea rows="4" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Etapas da Atividade:</label>
+            <div id="steps-container" class="steps-container">
+                <div class="step-item">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <div class="step-description">
+                            <label>Descrição da Etapa:</label>
+                            <textarea rows="2" placeholder="Descreva a etapa da atividade..." required></textarea>
+                        </div>
+                        <div class="step-risks">
+                            <label>Riscos Associados:</label>
+                            <textarea rows="2" placeholder="Descreva os riscos associados..." required></textarea>
+                        </div>
+                        <div class="step-controls">
+                            <label>Medidas de Controle:</label>
+                            <textarea rows="2" placeholder="Descreva as medidas de controle..." required></textarea>
+                        </div>
+                        <div class="step-risk-classification">
+                            <label>Classificação do Risco:</label>
+                            <div class="risk-inputs">
+                                <select class="step-probability" required>
+                                    <option value="">Probabilidade</option>
+                                    <option value="4">Frequente (4)</option>
+                                    <option value="3">Provável (3)</option>
+                                    <option value="2">Ocasional (2)</option>
+                                    <option value="1">Remota (1)</option>
+                                </select>
+                                <select class="step-severity" required>
+                                    <option value="">Severidade</option>
+                                    <option value="4">Catastrófica (4)</option>
+                                    <option value="3">Crítica (3)</option>
+                                    <option value="2">Marginal (2)</option>
+                                    <option value="1">Desprezível (1)</option>
+                                </select>
+                                <input type="text" class="step-risk-result" readonly placeholder="Classificação do Risco">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="addStep()" style="margin-top: 10px; background: #27ae60;">Adicionar Nova Etapa</button>
+        </div>
+
+        <div class="form-group">
+            <label>EPIs Necessários:</label>
+            <div class="checkbox-group">
+                <div class="checkbox-column">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="avental" name="epis_necessarios">
+                        <label for="avental">Avental de Raspa</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="bota_borracha" name="epis_necessarios">
+                        <label for="bota_borracha">Bota de Borracha</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="bota_pvc" name="epis_necessarios">
+                        <label for="bota_pvc">Bota de PVC</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="botina_composite" name="epis_necessarios">
+                        <label for="botina_composite">Botina de Segurança com Composite</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="capa_chuva" name="epis_necessarios">
+                        <label for="capa_chuva">Capa de Chuva</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="capacete" name="epis_necessarios">
+                        <label for="capacete">Capacete de Segurança</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="capuz_arabe" name="epis_necessarios">
+                        <label for="capuz_arabe">Capuz Tipo Touca Árabe</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="carneira" name="epis_necessarios">
+                        <label for="carneira">Carneira com Jugular</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cinto_paraquedista" name="epis_necessarios">
+                        <label for="cinto_paraquedista">Cinto de Segurança Tipo Paraquedista</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="colete" name="epis_necessarios">
+                        <label for="colete">Colete Refletivo</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="abafador" name="epis_necessarios">
+                        <label for="abafador">Kit Abafador de Ruídos Acoplável</label>
+                    </div>
+                </div>
+                <div class="checkbox-column">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="lente_mascara" name="epis_necessarios">
+                        <label for="lente_mascara">Lente para Máscara de Solda</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="luva_alta_tensao" name="epis_necessarios">
+                        <label for="luva_alta_tensao">Luva de Alta Tensão</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="luva_latex" name="epis_necessarios">
+                        <label for="luva_latex">Luva de Látex</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="luva_nitrilica" name="epis_necessarios">
+                        <label for="luva_nitrilica">Luva Nitrílica</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="luva_raspa" name="epis_necessarios">
+                        <label for="luva_raspa">Luva de Raspa</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="luva_super_safety" name="epis_necessarios">
+                        <label for="luva_super_safety">Luva Super Safety</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="luva_vaqueta" name="epis_necessarios">
+                        <label for="luva_vaqueta">Luva de Vaqueta</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="macacao_tyvek" name="epis_necessarios">
+                        <label for="macacao_tyvek">Macacão Tyvek</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="mascara_solda" name="epis_necessarios">
+                        <label for="mascara_solda">Máscara de Solda</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="oculos_ampla" name="epis_necessarios">
+                        <label for="oculos_ampla">Óculos Ampla Visão</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="oculos_graduado" name="epis_necessarios">
+                        <label for="oculos_graduado">Óculos de Segurança Graduado</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="perneira" name="epis_necessarios">
+                        <label for="perneira">Perneira</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="perneira_raspa" name="epis_necessarios">
+                        <label for="perneira_raspa">Perneira de Raspa</label>
+                    </div>
+                </div>
+                <div class="checkbox-column">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="oculos_escuro" name="epis_necessarios">
+                        <label for="oculos_escuro">Óculos de Segurança Escuro</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="oculos_incolor" name="epis_necessarios">
+                        <label for="oculos_incolor">Óculos de Segurança Incolor</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="protetor_concha" name="epis_necessarios">
+                        <label for="protetor_concha">Protetor Auditivo tipo Concha</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="protetor_plug" name="epis_necessarios">
+                        <label for="protetor_plug">Protetor Auditivo tipo Plug</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="protetor_solar" name="epis_necessarios">
+                        <label for="protetor_solar">Protetor Solar</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="repelente" name="epis_necessarios">
+                        <label for="repelente">Repelente</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="respirador_pff1" name="epis_necessarios">
+                        <label for="respirador_pff1">Respirador PFF1</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="respirador_pff2" name="epis_necessarios">
+                        <label for="respirador_pff2">Respirador PFF2</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="respirador_pff3" name="epis_necessarios">
+                        <label for="respirador_pff3">Respirador PFF3</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="respirador_semifacial" name="epis_necessarios">
+                        <label for="respirador_semifacial">Respirador Semi Facial com Filtro</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="talabarte" name="epis_necessarios">
+                        <label for="talabarte">Talabarte de Segurança</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>EPCs Necessários:</label>
+            <div class="checkbox-group">
+                <div class="checkbox-column">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sinalizacao" name="epcs_necessarios">
+                        <label for="sinalizacao">Sinalização de segurança (placas, cartazes, cones e fitas zebradas)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="extintores" name="epcs_necessarios">
+                        <label for="extintores">Extintores de incêndio, hidrantes e sistemas de sprinklers</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="redes_protecao" name="epcs_necessarios">
+                        <label for="redes_protecao">Redes de proteção</label>
+                    </div>
+                </div>
+                <div class="checkbox-column">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="lava_olhos" name="epcs_necessarios">
+                        <label for="lava_olhos">Lava-olhos e chuveiros de emergência</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="exaustores" name="epcs_necessarios">
+                        <label for="exaustores">Exaustores para gases e vapores</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="primeiros_socorros" name="epcs_necessarios">
+                        <label for="primeiros_socorros">Kit de primeiros socorros</label>
+                    </div>
+                </div>
+                <div class="checkbox-column">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="corrimaos" name="epcs_necessarios">
+                        <label for="corrimaos">Corrimãos e guarda-corpos</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="detector_fumaca" name="epcs_necessarios">
+                        <label for="detector_fumaca">Detector de fumaça</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="piso_antiderrapante" name="epcs_necessarios">
+                        <label for="piso_antiderrapante">Piso antiderrapante</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Observações Adicionais:</label>
+            <textarea rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Assinatura Digital:</label>
+            <div class="signature-container">
+                <canvas id="signatureCanvas" width="600" height="200" style="border: 1px solid #ddd; border-radius: 5px;"></canvas>
+                <div class="signature-buttons" style="margin-top: 10px;">
+                    <button type="button" onclick="clearSignature()" style="background: #e74c3c; width: auto; margin-right: 10px;">Limpar Assinatura</button>
+                    <button type="button" onclick="saveSignature()" style="background: #27ae60; width: auto;">Salvar Assinatura</button>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit">Enviar Análise de Risco</button>
+        <button type="button" onclick="printForm()" class="print-button">Imprimir APR</button>
+        <button type="button" onclick="generatePDF()" class="pdf-button" style="background: linear-gradient(135deg, #8e44ad, #9b59b6) !important; margin-top: 20px !important;">Gerar PDF</button>
+    </form>
+</div>
+
+<script>
+let stepCounter = 1;
+let isDrawing = false;
+let signatureCanvas;
+let ctx;
+
+function updateStepNumbers() {
+    const steps = document.querySelectorAll('.step-item');
+    steps.forEach((step, index) => {
+        const numberSpan = step.querySelector('.step-number');
+        if (numberSpan) {
+            numberSpan.textContent = (index + 1).toString();
+        }
+    });
+    stepCounter = steps.length;
+}
+
+function addStep() {
+    stepCounter++;
+    const container = document.getElementById('steps-container');
+    const newStep = document.createElement('div');
+    newStep.className = 'step-item';
+    newStep.innerHTML = `
+        <span class="step-number">${stepCounter}</span>
+        <div class="step-content">
+            <div class="step-description">
+                <label>Descrição da Etapa ${stepCounter}:</label>
+                <textarea rows="2" placeholder="Descreva a etapa da atividade..." required></textarea>
+            </div>
+            <div class="step-risks">
+                <label>Riscos Associados:</label>
+                <textarea rows="2" placeholder="Descreva os riscos associados..." required></textarea>
+            </div>
+            <div class="step-controls">
+                <label>Medidas de Controle:</label>
+                <textarea rows="2" placeholder="Descreva as medidas de controle..." required></textarea>
+            </div>
+            <div class="step-risk-classification">
+                <label>Classificação do Risco:</label>
+                <div class="risk-inputs">
+                    <select class="step-probability" required>
+                        <option value="">Probabilidade</option>
+                        <option value="4">Frequente (4)</option>
+                        <option value="3">Provável (3)</option>
+                        <option value="2">Ocasional (2)</option>
+                        <option value="1">Remota (1)</option>
+                    </select>
+                    <select class="step-severity" required>
+                        <option value="">Severidade</option>
+                        <option value="4">Catastrófica (4)</option>
+                        <option value="3">Crítica (3)</option>
+                        <option value="2">Marginal (2)</option>
+                        <option value="1">Desprezível (1)</option>
+                    </select>
+                    <input type="text" class="step-risk-result" readonly placeholder="Classificação do Risco">
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(newStep);
+    
+    // Add event listeners for risk calculation
+    const probability = newStep.querySelector('.step-probability');
+    const severity = newStep.querySelector('.step-severity');
+    const result = newStep.querySelector('.step-risk-result');
+    
+    probability.addEventListener('change', () => calculateStepRisk(probability, severity, result));
+    severity.addEventListener('change', () => calculateStepRisk(probability, severity, result));
+}
+
+// Add new function to calculate risk for each step
+function calculateStepRisk(probabilitySelect, severitySelect, resultInput) {
+    const probability = parseInt(probabilitySelect.value) || 0;
+    const severity = parseInt(severitySelect.value) || 0;
+    
+    if (probability && severity) {
+        const riskValue = probability * severity;
+        let riskClass = '';
+        let textColor = '';
+        
+        if (riskValue >= 12) {
+            riskClass = 'Muito Alto';
+            textColor = '#ff0000'; // Red
+        } else if (riskValue >= 8) {
+            riskClass = 'Alto';
+            textColor = '#ff6600'; // Orange
+        } else if (riskValue >= 4) {
+            riskClass = 'Médio';
+            textColor = '#ffcc00'; // Yellow
+        } else if (riskValue >= 2) {
+            riskClass = 'Baixo';
+            textColor = '#66cc00'; // Light green
+        } else {
+            riskClass = 'Muito Baixo';
+            textColor = '#009900'; // Dark green
+        }
+        
+        resultInput.value = `${riskClass} (${riskValue} pontos)`;
+        resultInput.style.color = textColor;
+        resultInput.style.fontWeight = 'bold';
+    } else {
+        resultInput.value = '';
+        resultInput.style.color = 'initial';
+    }
+}
+
+document.getElementById('riskForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Get signature data
+    const signatureData = signatureCanvas.toDataURL();
+    if (isCanvasBlank()) {
+        alert('Por favor, adicione sua assinatura antes de enviar o formulário.');
+        return;
+    }
+    
+    alert('Análise de Risco enviada com sucesso!');
+    this.reset();
+    clearSignature();
+    stepCounter = 1;
+    const container = document.getElementById('steps-container');
+    container.innerHTML = `
+        <div class="step-item">
+            <span class="step-number">1</span>
+            <div class="step-content">
+                <div class="step-description">
+                    <label>Descrição da Etapa:</label>
+                    <textarea rows="2" placeholder="Descreva a etapa da atividade..." required></textarea>
+                </div>
+                <div class="step-risks">
+                    <label>Riscos Associados:</label>
+                    <textarea rows="2" placeholder="Descreva os riscos associados..." required></textarea>
+                </div>
+                <div class="step-controls">
+                    <label>Medidas de Controle:</label>
+                    <textarea rows="2" placeholder="Descreva as medidas de controle..." required></textarea>
+                </div>
+                <div class="step-risk-classification">
+                    <label>Classificação do Risco:</label>
+                    <div class="risk-inputs">
+                        <select class="step-probability" required>
+                            <option value="">Probabilidade</option>
+                            <option value="4">Frequente (4)</option>
+                            <option value="3">Provável (3)</option>
+                            <option value="2">Ocasional (2)</option>
+                            <option value="1">Remota (1)</option>
+                        </select>
+                        <select class="step-severity" required>
+                            <option value="">Severidade</option>
+                            <option value="4">Catastrófica (4)</option>
+                            <option value="3">Crítica (3)</option>
+                            <option value="2">Marginal (2)</option>
+                            <option value="1">Desprezível (1)</option>
+                        </select>
+                        <input type="text" class="step-risk-result" readonly placeholder="Classificação do Risco">
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+});
+
+function isCanvasBlank() {
+    const blank = document.createElement('canvas');
+    blank.width = signatureCanvas.width;
+    blank.height = signatureCanvas.height;
+    return signatureCanvas.toDataURL() === blank.toDataURL();
+}
+
+function setupSignatureCanvas() {
+    signatureCanvas = document.getElementById('signatureCanvas');
+    ctx = signatureCanvas.getContext('2d');
+    
+    // Set canvas drawing style
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    
+    // Mouse Events
+    signatureCanvas.addEventListener('mousedown', startDrawing);
+    signatureCanvas.addEventListener('mousemove', draw);
+    signatureCanvas.addEventListener('mouseup', stopDrawing);
+    signatureCanvas.addEventListener('mouseout', stopDrawing);
+    
+    // Touch Events
+    signatureCanvas.addEventListener('touchstart', handleTouch);
+    signatureCanvas.addEventListener('touchmove', handleTouch);
+    signatureCanvas.addEventListener('touchend', stopDrawing);
+}
+
+function handleTouch(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = signatureCanvas.getBoundingClientRect();
+    const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 'mousemove', {
+        clientX: touch.clientX - rect.left,
+        clientY: touch.clientY - rect.top
+    });
+    signatureCanvas.dispatchEvent(mouseEvent);
+}
+
+function startDrawing(e) {
+    isDrawing = true;
+    ctx.beginPath();
+    const rect = signatureCanvas.getBoundingClientRect();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+
+function draw(e) {
+    if (!isDrawing) return;
+    const rect = signatureCanvas.getBoundingClientRect();
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+}
+
+function stopDrawing() {
+    isDrawing = false;
+}
+
+function clearSignature() {
+    ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+}
+
+function saveSignature() {
+    const signatureData = signatureCanvas.toDataURL();
+    alert('Assinatura salva com sucesso!');
+}
+
+function printForm() {
+    window.print();
+}
+
+function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    
+    // Create loading indicator
+    const loadingDiv = document.createElement('div');
+    loadingDiv.style.position = 'fixed';
+    loadingDiv.style.top = '50%';
+    loadingDiv.style.left = '50%';
+    loadingDiv.style.transform = 'translate(-50%, -50%)';
+    loadingDiv.style.padding = '20px';
+    loadingDiv.style.background = 'rgba(0,0,0,0.8)';
+    loadingDiv.style.color = 'white';
+    loadingDiv.style.borderRadius = '10px';
+    loadingDiv.style.zIndex = '9999';
+    loadingDiv.textContent = 'Gerando PDF...';
+    document.body.appendChild(loadingDiv);
+
+    const element = document.querySelector('.container');
+    const pdf = new jsPDF('p', 'pt', 'a4');
+    const scale = 0.75; // Adjust scale to fit content on PDF
+
+    html2canvas(element, {
+        scale: scale,
+        useCORS: true,
+        logging: false
+    }).then(canvas => {
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const imgWidth = 595.28; // A4 width in points
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+        
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= 841.89; // A4 height in points
+        
+        while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+            heightLeft -= 841.89;
+        }
+        
+        pdf.save('Analise_Preliminar_de_Risco.pdf');
+        document.body.removeChild(loadingDiv);
+    });
+}
+
+window.onload = function() {
+    const firstStep = document.querySelector('.step-item');
+    if (firstStep) {
+        const stepNumber = document.createElement('span');
+        stepNumber.className = 'step-number';
+        stepNumber.textContent = '1';
+        firstStep.insertBefore(stepNumber, firstStep.firstChild);
+        
+        // Add event listeners for the first step
+        const probability = firstStep.querySelector('.step-probability');
+        const severity = firstStep.querySelector('.step-severity');
+        const result = firstStep.querySelector('.step-risk-result');
+        
+        probability.addEventListener('change', () => calculateStepRisk(probability, severity, result));
+        severity.addEventListener('change', () => calculateStepRisk(probability, severity, result));
+    }
+    setupSignatureCanvas();
+};
+</script>
+
+</body></html>
